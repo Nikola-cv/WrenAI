@@ -9,7 +9,7 @@ import { Manifest } from '../mdl/type';
 import { createHash } from 'node:crypto';
 import { getLogger } from '@server/utils';
 import {
-  PostHogTelemetry,
+  HttpTelemetry,
   TelemetryEvent,
   WrenService,
 } from '../telemetry/telemetry';
@@ -42,7 +42,7 @@ export interface IDeployService {
 export class DeployService implements IDeployService {
   private wrenAIAdaptor: IWrenAIAdaptor;
   private deployLogRepository: IDeployLogRepository;
-  private telemetry: PostHogTelemetry;
+  private telemetry: HttpTelemetry;
 
   constructor({
     wrenAIAdaptor,
@@ -51,7 +51,7 @@ export class DeployService implements IDeployService {
   }: {
     wrenAIAdaptor: IWrenAIAdaptor;
     deployLogRepository: IDeployLogRepository;
-    telemetry: PostHogTelemetry;
+    telemetry: HttpTelemetry;
   }) {
     this.wrenAIAdaptor = wrenAIAdaptor;
     this.deployLogRepository = deployLogRepository;

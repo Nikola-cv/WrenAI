@@ -13,7 +13,7 @@ import {
 } from '@server/repositories';
 import { IWrenAIAdaptor } from '../adaptors';
 import { TelemetryEvent, WrenService } from '../telemetry/telemetry';
-import { PostHogTelemetry } from '../telemetry/telemetry';
+import { HttpTelemetry } from '../telemetry/telemetry';
 
 const logger = getLogger('AdjustmentTaskTracker');
 logger.level = 'debug';
@@ -78,7 +78,7 @@ export class AdjustmentBackgroundTaskTracker
   private pollingIntervalId: NodeJS.Timeout;
   private runningJobs = new Set<string>();
   private threadResponseRepository: IThreadResponseRepository;
-  private telemetry: PostHogTelemetry;
+  private telemetry: HttpTelemetry;
 
   constructor({
     telemetry,
@@ -88,7 +88,7 @@ export class AdjustmentBackgroundTaskTracker
     pollingInterval = 1000, // 1 second
     memoryRetentionTime = 5 * 60 * 1000, // 5 minutes
   }: {
-    telemetry: PostHogTelemetry;
+    telemetry: HttpTelemetry;
     wrenAIAdaptor: IWrenAIAdaptor;
     askingTaskRepository: IAskingTaskRepository;
     threadResponseRepository: IThreadResponseRepository;
