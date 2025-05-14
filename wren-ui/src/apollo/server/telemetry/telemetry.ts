@@ -1,5 +1,7 @@
+import fetch from 'node-fetch';
+import FormData from 'form-data';
 import { getConfig } from '../config';
-import { PostHog } from 'posthog-node';
+import { Buffer } from 'buffer';
 import { v4 as uuidv4 } from 'uuid';
 import { getLogger } from '@server/utils';
 import { IContext } from '../types';
@@ -16,8 +18,10 @@ const {
   generationModel,
   wrenEngineVersion,
   wrenUIVersion,
-  posthogApiKey,
-  posthogHost,
+  telemetryHttpEndpoint,
+  usernameHttp,
+  passwordHttp,
+  endpointTag,
 } = config;
 
 export enum TelemetryEvent {
@@ -101,25 +105,24 @@ export interface ITelemetry {
   ) => void;
 }
 
-export class PostHogTelemetry {
-  private readonly posthog: any;
+export class HttpTelemetry {
   private readonly userId: string;
+  private readonly endpoint: string;
+  private readonly auth: string;
 
   constructor() {
-    if (telemetryEnabled) {
-      if (!posthogApiKey) {
-        logger.debug('Telemetry enabled but posthogApiKey not provided.');
-        return;
-      }
-      const client = new PostHog(posthogApiKey, {
-        host: posthogHost || 'https://us.posthog.com',
-      });
-      this.posthog = client;
-      this.userId = userUUID || uuidv4();
-      logger.info(`Telemetry initialized: ${this.userId}`);
+    if (!telemetryEnabled) {
+      logger.info('Telemetry not enabled.');
       return;
     }
-    logger.info('Telemetry not enabled.');
+
+    this.endpoint = telemetryHttpEndpoint;
+    logger.info(`Telemetry initialized: ${this.endpoint}`);
+    this.userId = userUUID || uuidv4();
+    logger.info(`Telemetry initialized: ${this.userId}`);
+    this.auth = Buffer.from(`${usernameHttp}:${passwordHttp}`).toString(
+      'base64',
+    );
   }
 
   public async sendEvent(
@@ -128,38 +131,45 @@ export class PostHogTelemetry {
     service: WrenService | any = WrenService.UNKNOWN,
     actionSuccess: boolean = true,
   ) {
-    if (!this.posthog) {
-      return;
-    }
     const eventName = actionSuccess ? `${event}_success` : `${event}_failed`;
+    const payload = {
+      userId: this.userId,
+      event: eventName,
+      service,
+      timestamp: new Date().toISOString(),
+      properties: {
+        ...this.collectSystemInfo(),
+        ...properties,
+      },
+    };
+
+    const form = new FormData();
+    form.append('data_chunk', JSON.stringify(payload));
+    form.append('reference', endpointTag);
     try {
-      console.log('sendEvent', eventName, properties, service, actionSuccess);
-      const systemInfo = this.collectSystemInfo();
-      this.posthog.capture({
-        distinctId: this.userId,
-        event: eventName,
-        properties: {
-          ...systemInfo,
-          ...properties,
-          wren_service: service,
+      const res = await fetch(this.endpoint, {
+        method: 'POST',
+        headers: {
+          ...form.getHeaders(),
+          Authorization: `Basic ${this.auth}`,
         },
+        body: form,
       });
-    } catch (e) {
-      logger.error(e);
+
+      if (!res.ok) {
+        throw new Error(`Failed to send telemetry: ${res.statusText}`);
+      }
+    } catch (err) {
+      logger.error('Error sending telemetry', err);
     }
   }
 
   private collectSystemInfo(): Record<string, any> {
     return {
-      // collect services version
       'wren-ui-version': wrenUIVersion || null,
       'wren-engine-version': wrenEngineVersion || null,
       'wren-ai-service-version': wrenAIVersion || null,
-
-      // collect AI model info
       'generation-model': generationModel || null,
-
-      // collect some system info from process module
       node_version: process.version,
       node_platform: process.platform,
       node_arch: process.arch,
@@ -169,9 +179,7 @@ export class PostHogTelemetry {
   }
 
   public stop() {
-    if (this.posthog) {
-      this.posthog.shutdown();
-    }
+    // Optional cleanup
   }
 }
 
