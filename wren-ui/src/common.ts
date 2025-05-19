@@ -36,7 +36,7 @@ import {
   AskingTaskTracker,
   InstructionService,
 } from '@server/services';
-import { PostHogTelemetry } from './apollo/server/telemetry/telemetry';
+import { HttpTelemetry } from './apollo/server/telemetry/telemetry';
 import {
   ProjectRecommendQuestionBackgroundTracker,
   ThreadRecommendQuestionBackgroundTracker,
@@ -47,7 +47,7 @@ import { SqlPairService } from './apollo/server/services/sqlPairService';
 export const serverConfig = getConfig();
 
 export const initComponents = () => {
-  const telemetry = new PostHogTelemetry();
+  const telemetry = new HttpTelemetry(); //PostHogTelemetry();
   const knex = bootstrapKnex({
     dbType: serverConfig.dbType,
     pgUrl: serverConfig.pgUrl,

@@ -78,7 +78,7 @@ services:
       - wren
 
   wren-ui:
-    image: ghcr.io/canner/wren-ui:${WREN_UI_VERSION}
+    image: ghcr.io/nikola-cv/wren-ui:${WREN_UI_VERSION}
     restart: on-failure
     platform: ${PLATFORM}
     environment:
@@ -96,8 +96,10 @@ services:
       WREN_UI_VERSION: ${WREN_UI_VERSION}
       WREN_ENGINE_VERSION: ${WREN_ENGINE_VERSION}
       USER_UUID: ${USER_UUID}
-      POSTHOG_API_KEY: ${POSTHOG_API_KEY}
-      POSTHOG_HOST: ${POSTHOG_HOST}
+      HTTP_ENDPOINT: ${HTTP_ENDPOINT}
+      HTTP_USER: ${HTTP_USER}
+      HTTP_PWD: ${HTTP_PWD}
+      ENDPOINT_TAG: ${ENDPOINT_TAG}
       TELEMETRY_ENABLED: ${TELEMETRY_ENABLED}
       # client side
       NEXT_PUBLIC_USER_UUID: ${USER_UUID}

@@ -22,7 +22,7 @@ import { getLogger } from '@server/utils';
 import { isEmpty, isNil } from 'lodash';
 import { format } from 'sql-formatter';
 import {
-  PostHogTelemetry,
+  HttpTelemetry,
   TelemetryEvent,
   WrenService,
 } from '../telemetry/telemetry';
@@ -287,14 +287,14 @@ class BreakdownBackgroundTracker {
   private wrenAIAdaptor: IWrenAIAdaptor;
   private threadResponseRepository: IThreadResponseRepository;
   private runningJobs = new Set();
-  private telemetry: PostHogTelemetry;
+  private telemetry: HttpTelemetry;
 
   constructor({
     telemetry,
     wrenAIAdaptor,
     threadResponseRepository,
   }: {
-    telemetry: PostHogTelemetry;
+    telemetry: HttpTelemetry;
     wrenAIAdaptor: IWrenAIAdaptor;
     threadResponseRepository: IThreadResponseRepository;
   }) {
@@ -411,7 +411,7 @@ export class AskingService implements IAskingService {
   private chartAdjustmentBackgroundTracker: ChartAdjustmentBackgroundTracker;
   private threadRecommendQuestionBackgroundTracker: ThreadRecommendQuestionBackgroundTracker;
   private queryService: IQueryService;
-  private telemetry: PostHogTelemetry;
+  private telemetry: HttpTelemetry;
   private mdlService: IMDLService;
   private askingTaskTracker: IAskingTaskTracker;
   private askingTaskRepository: IAskingTaskRepository;
@@ -430,7 +430,7 @@ export class AskingService implements IAskingService {
     mdlService,
     askingTaskTracker,
   }: {
-    telemetry: PostHogTelemetry;
+    telemetry: HttpTelemetry;
     wrenAIAdaptor: IWrenAIAdaptor;
     deployService: IDeployService;
     projectService: IProjectService;

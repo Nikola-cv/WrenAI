@@ -10,7 +10,7 @@ import {
 } from '../adaptors/ibisAdaptor';
 import { getLogger } from '@server/utils';
 import { Project } from '../repositories';
-import { PostHogTelemetry, TelemetryEvent } from '../telemetry/telemetry';
+import { HttpTelemetry, TelemetryEvent } from '../telemetry/telemetry';
 
 const logger = getLogger('QueryService');
 logger.level = 'debug';
@@ -79,7 +79,7 @@ export interface IQueryService {
 export class QueryService implements IQueryService {
   private readonly ibisAdaptor: IIbisAdaptor;
   private readonly wrenEngineAdaptor: IWrenEngineAdaptor;
-  private readonly telemetry: PostHogTelemetry;
+  private readonly telemetry: HttpTelemetry;
 
   constructor({
     ibisAdaptor,
@@ -88,7 +88,7 @@ export class QueryService implements IQueryService {
   }: {
     ibisAdaptor: IIbisAdaptor;
     wrenEngineAdaptor: IWrenEngineAdaptor;
-    telemetry: PostHogTelemetry;
+    telemetry: HttpTelemetry;
   }) {
     this.ibisAdaptor = ibisAdaptor;
     this.wrenEngineAdaptor = wrenEngineAdaptor;
